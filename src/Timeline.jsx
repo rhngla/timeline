@@ -274,27 +274,42 @@ export default function Timeline() {
       const dateNode = group.select('.date-text').node();
       const descNode = group.select('.desc-text').node();
 
-      const labelWidth = labelNode ? labelNode.getBBox().width : 0;
-      const dateWidth = dateNode ? dateNode.getBBox().width : 0;
-      const descBBox = descNode ? descNode.getBBox() : { width: 0, height: 0 };
+      const labelBBox = labelNode ? labelNode.getBBox() : { x: -50, y: -25, width: 100, height: 20 };
+      const dateBBox = dateNode ? dateNode.getBBox() : { x: -40, y: -10, width: 80, height: 18 };
+      const descBBox = descNode ? descNode.getBBox() : { x: -60, y: -2, width: 120, height: 0 };
 
+      const collapsedTop = Math.min(labelBBox.y, dateBBox.y);
+      const collapsedBottom = Math.max(
+        labelBBox.y + labelBBox.height,
+        dateBBox.y + dateBBox.height,
+      );
+      const basePadding = 12;
+      const baseHeight = (collapsedBottom - collapsedTop) + basePadding * 2;
+      const baseY = collapsedTop - basePadding;
+
+      const expandedTop = Math.min(collapsedTop, descBBox.y);
+      const expandedBottom = Math.max(collapsedBottom, descBBox.y + descBBox.height);
+      const hoverPadding = Math.max(18, basePadding + 6);
+      const hoverHeight = (expandedBottom - expandedTop) + hoverPadding * 2;
+      const hoverY = expandedTop - hoverPadding;
+
+      const labelWidth = labelBBox.width;
+      const dateWidth = dateBBox.width;
       const baseWidth = Math.max(140, Math.max(labelWidth, dateWidth) + 40);
       const hoverWidth = Math.max(baseWidth + 80, descBBox.width + 40, 260);
-      const baseHeight = 45;
-      const hoverHeight = Math.max(110, descBBox.height + 60);
 
       datum.baseWidth = baseWidth;
       datum.hoverWidth = hoverWidth;
       datum.baseHeight = baseHeight;
       datum.hoverHeight = hoverHeight;
-      datum.baseY = datum.isAbove ? -(baseHeight + 5) : 5;
-      datum.hoverY = datum.isAbove ? -(hoverHeight + 5) : 5;
+      datum.baseY = baseY;
+      datum.hoverY = hoverY;
 
       group.select('.label-bg')
         .attr('x', -baseWidth / 2)
         .attr('width', baseWidth)
         .attr('height', baseHeight)
-        .attr('y', datum.baseY);
+        .attr('y', baseY);
     });
 
     labelGroups
