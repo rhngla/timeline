@@ -492,7 +492,9 @@ export default function Timeline() {
             Reset
           </button>
         </div>
-        <svg ref={svgRef} />
+        <div className="timeline-scroll">
+          <svg ref={svgRef} />
+        </div>
       </div>
     </div>
   );

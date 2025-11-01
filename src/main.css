@@ -35,13 +35,19 @@ body {
   background: #ffffff;
   border-radius: 16px;
   box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
-  overflow-x: auto;
-  overflow-y: hidden;
   padding: 1rem;
   position: relative;
+  overflow: visible;
 }
 
-.timeline-wrapper svg {
+.timeline-scroll {
+  width: 100%;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.timeline-scroll svg {
   display: block;
   overflow: visible;
 }
