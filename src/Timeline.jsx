@@ -167,6 +167,9 @@ export default function Timeline() {
     const labelsGroup = rootGroup.append('g').attr('class', 'timeline-labels');
     const yearsGroup = rootGroup.append('g').attr('class', 'timeline-years');
 
+    const connectorByIndex = [];
+    const dotsByKey = new Map();
+
     const connectors = connectorsGroup.selectAll('.label-connector')
       .data(processedEvents)
       .enter()
@@ -181,6 +184,10 @@ export default function Timeline() {
       .append('g')
       .attr('class', 'dot-group');
 
+    dotGroups.each((d, i, nodes) => {
+      dotsByKey.set(d.dateKey, d3.select(nodes[i]));
+    });
+
     dotGroups.append('circle')
       .attr('class', 'event-dot')
       .attr('r', 8)
@@ -192,6 +199,13 @@ export default function Timeline() {
       .enter()
       .append('g')
       .attr('class', 'label-group');
+
+    const connectorNodes = connectors.nodes();
+    connectorNodes.forEach((node, idx) => {
+      connectorByIndex[idx] = d3.select(node);
+    });
+
+    const labelNodes = labelGroups.nodes();
 
     labelGroups.append('rect')
       .attr('class', 'label-bg')
@@ -256,11 +270,16 @@ export default function Timeline() {
 
     labelGroups
       .on('mouseenter', function handleMouseEnter(event, datum) {
+        const index = labelNodes.indexOf(this);
+        if (index > -1) {
+          connectorByIndex[index]?.raise();
+        }
+        dotsByKey.get(datum.dateKey)?.raise();
+        d3.select(this).raise();
         const group = d3.select(this);
 
-        dotGroups
-          .filter((dotDatum) => dotDatum.dateKey === datum.dateKey)
-          .select('.event-dot')
+        dotsByKey.get(datum.dateKey)
+          ?.select('.event-dot')
           .transition()
           .duration(200)
           .attr('r', 10);
@@ -281,9 +300,8 @@ export default function Timeline() {
       .on('mouseleave', function handleMouseLeave(event, datum) {
         const group = d3.select(this);
 
-        dotGroups
-          .filter((dotDatum) => dotDatum.dateKey === datum.dateKey)
-          .select('.event-dot')
+        dotsByKey.get(datum.dateKey)
+          ?.select('.event-dot')
           .transition()
           .duration(200)
           .attr('r', 8);
