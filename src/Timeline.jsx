@@ -153,7 +153,7 @@ export default function Timeline() {
 
     const rootGroup = svg.append('g').attr('class', 'timeline-root');
 
-    rootGroup.append('line')
+    const axisLine = rootGroup.append('line')
       .attr('class', 'timeline-axis')
       .attr('x1', margin.left)
       .attr('x2', margin.left + innerWidth)
@@ -268,6 +268,35 @@ export default function Timeline() {
         });
       });
 
+    labelGroups.each(function configureLabelDimensions(datum) {
+      const group = d3.select(this);
+      const labelNode = group.select('.label-text').node();
+      const dateNode = group.select('.date-text').node();
+      const descNode = group.select('.desc-text').node();
+
+      const labelWidth = labelNode ? labelNode.getBBox().width : 0;
+      const dateWidth = dateNode ? dateNode.getBBox().width : 0;
+      const descBBox = descNode ? descNode.getBBox() : { width: 0, height: 0 };
+
+      const baseWidth = Math.max(140, Math.max(labelWidth, dateWidth) + 40);
+      const hoverWidth = Math.max(baseWidth + 80, descBBox.width + 40, 260);
+      const baseHeight = 45;
+      const hoverHeight = Math.max(110, descBBox.height + 60);
+
+      datum.baseWidth = baseWidth;
+      datum.hoverWidth = hoverWidth;
+      datum.baseHeight = baseHeight;
+      datum.hoverHeight = hoverHeight;
+      datum.baseY = datum.isAbove ? -(baseHeight + 5) : 5;
+      datum.hoverY = datum.isAbove ? -(hoverHeight + 5) : 5;
+
+      group.select('.label-bg')
+        .attr('x', -baseWidth / 2)
+        .attr('width', baseWidth)
+        .attr('height', baseHeight)
+        .attr('y', datum.baseY);
+    });
+
     labelGroups
       .on('mouseenter', function handleMouseEnter(event, datum) {
         const index = labelNodes.indexOf(this);
@@ -287,9 +316,10 @@ export default function Timeline() {
         group.select('.label-bg')
           .transition()
           .duration(200)
-          .attr('x', -140)
-          .attr('width', 280)
-          .attr('height', 110)
+          .attr('x', -(datum.hoverWidth || 280) / 2)
+          .attr('width', datum.hoverWidth || 280)
+          .attr('height', datum.hoverHeight || 110)
+          .attr('y', datum.hoverY ?? (datum.isAbove ? -115 : 5))
           .attr('stroke', '#f97316');
 
         group.select('.desc-text')
@@ -309,9 +339,10 @@ export default function Timeline() {
         group.select('.label-bg')
           .transition()
           .duration(200)
-          .attr('x', -70)
-          .attr('width', 140)
-          .attr('height', 45)
+          .attr('x', -(datum.baseWidth || 140) / 2)
+          .attr('width', datum.baseWidth || 140)
+          .attr('height', datum.baseHeight || 45)
+          .attr('y', datum.baseY ?? (datum.isAbove ? -50 : 5))
           .attr('stroke', '#d1d5db');
 
         group.select('.desc-text')
@@ -354,6 +385,10 @@ export default function Timeline() {
       const labelY = (event) => (event.isAbove
         ? timelineY - (event.labelDistance + 20)
         : timelineY + (event.labelDistance + 20));
+
+      axisLine
+        .attr('x1', positionX(timelineStart))
+        .attr('x2', positionX(timelineEnd));
 
       connectors
         .attr('x1', (d) => positionX(d.parsedDate))
