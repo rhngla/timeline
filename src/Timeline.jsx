@@ -1,0 +1,376 @@
+import React, { useEffect, useRef } from 'react';
+import * as d3 from 'd3';
+
+export default function Timeline() {
+  const svgRef = useRef(null);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    const events = [
+      { date: 'Jan 2020', label: 'Project Kickoff', description: 'Initial planning and team formation for the new product line.' },
+      { date: 'Mar 2020', label: 'First Prototype', description: 'Completed the first working prototype with core functionality.' },
+      { date: 'Jul 2020', label: 'Alpha Release', description: 'Released alpha version to internal testers for feedback.' },
+      { date: 'Nov 2020', label: 'Beta Launch', description: 'Public beta launched with 1,000 early adopters.' },
+      { date: 'Feb 2021', label: 'Series A Funding', description: 'Secured $5M in Series A funding from venture partners.' },
+      { date: 'Jun 2021', label: 'V1.0 Launch', description: 'Official product launch with full feature set.' },
+      { date: 'Sep 2021', label: 'Mobile App', description: 'Released iOS and Android mobile applications.' },
+      { date: 'Jan 2022', label: '10K Users', description: 'Reached milestone of 10,000 active users.' },
+      { date: 'Feb 2022', label: 'Enterprise Plan', description: 'Launched enterprise tier with advanced features.' },
+      { date: 'Apr 2022', label: 'International', description: 'Expanded to European and Asian markets.' },
+      { date: 'Jul 2022', label: 'V2.0 Release', description: 'Major update with AI-powered features and redesigned UI.' },
+      { date: 'Jul 2022', label: 'New Office', description: 'Opened new headquarters in San Francisco.' },
+      { date: 'Oct 2022', label: 'Partnership', description: 'Strategic partnership with major tech company.' },
+      { date: 'Mar 2023', label: 'Acquisition', description: 'Acquired competitor startup to expand market share.' },
+      { date: 'Jul 2023', label: '100K Users', description: 'User base grew to over 100,000 active accounts.' },
+      { date: 'Oct 2023', label: 'API Launch', description: 'Released public API for third-party integrations.' },
+      { date: 'Jan 2024', label: 'Series B', description: 'Closed $20M Series B round led by major tech investors.' },
+      { date: 'May 2024', label: 'V3.0 Beta', description: 'Started beta testing for next major version with ML features.' },
+      { date: 'Sep 2024', label: 'New Feature', description: 'Launched AI-powered analytics dashboard.' },
+    ];
+
+    const parseDate = (dateStr) => {
+      const [month, year] = dateStr.split(' ');
+      const monthNum = {
+        'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
+        'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
+      }[month];
+      return new Date(parseInt(year), monthNum, 1);
+    };
+
+    const svg = d3.select(svgRef.current);
+    svg.selectAll("*").remove();
+
+    const margin = { top: 150, right: 100, bottom: 100, left: 100 };
+    const height = 700;
+    const timelineY = height / 2;
+
+    // Parse dates
+    const eventsWithDates = events.map(e => ({
+      ...e,
+      parsedDate: parseDate(e.date)
+    }));
+
+    // Group events by exact date
+    const eventsByDate = d3.group(eventsWithDates, d => d.date);
+    
+    // Get unique dates
+    const uniqueDates = Array.from(eventsByDate.keys());
+
+    const xScale = d3.scaleTime()
+      .domain([parseDate('Jan 2020'), parseDate('Dec 2024')])
+      .range([margin.left, margin.left + 1000]);
+
+    const width = margin.left + 1100;
+    svg.attr('width', width).attr('height', height);
+
+    // Calculate vertical levels with staggering
+    const calculateVerticalLevels = () => {
+      const positions = uniqueDates.map(date => xScale(parseDate(date)));
+      const levels = [];
+      const minDistance = 120;
+      
+      for (let i = 0; i < positions.length; i++) {
+        if (i === 0) {
+          levels.push(1);
+        } else {
+          let level = 1;
+          
+          for (let tryLevel of [1, -1, 2, -2, 3, -3]) {
+            let canUse = true;
+            
+            for (let j = 0; j < i; j++) {
+              const distance = Math.abs(positions[i] - positions[j]);
+              if (distance < minDistance && levels[j] === tryLevel) {
+                canUse = false;
+                break;
+              }
+            }
+            
+            if (canUse) {
+              level = tryLevel;
+              break;
+            }
+          }
+          
+          levels.push(level);
+        }
+      }
+      
+      return levels;
+    };
+
+    const verticalLevels = calculateVerticalLevels();
+
+    // Process all events with stacking info
+    const processedEvents = [];
+    const uniqueDots = [];
+    
+    uniqueDates.forEach((dateStr, dateIndex) => {
+      const dateEvents = eventsByDate.get(dateStr);
+      const x = xScale(parseDate(dateStr));
+      const level = verticalLevels[dateIndex];
+      const isAbove = level > 0;
+      const baseLabelDistance = Math.abs(level) * 80;
+      
+      // Add dot for this unique date
+      uniqueDots.push({ date: dateStr, x: x });
+      
+      // Process each event at this date
+      dateEvents.forEach((event, stackIndex) => {
+        const labelDistance = baseLabelDistance + (stackIndex * 100);
+        
+        processedEvents.push({
+          ...event,
+          x: x,
+          isAbove: isAbove,
+          labelDistance: labelDistance,
+          dateStr: dateStr,
+          stackIndex: stackIndex,
+          isFirstAtDate: stackIndex === 0
+        });
+      });
+    });
+
+    const defs = svg.append('defs');
+    const clipPath = defs.append('clipPath').attr('id', 'line-clip');
+    clipPath.append('rect')
+      .attr('x', 0)
+      .attr('y', 0)
+      .attr('width', width)
+      .attr('height', height);
+
+    // Draw main timeline line
+    svg.append('line')
+      .attr('x1', margin.left - 50)
+      .attr('x2', width - margin.right + 50)
+      .attr('y1', timelineY)
+      .attr('y2', timelineY)
+      .attr('stroke', '#d1d5db')
+      .attr('stroke-width', 3);
+
+    // Draw year markers
+    const years = [2020, 2021, 2022, 2023, 2024];
+    years.forEach(year => {
+      const x = xScale(parseDate(`Jan ${year}`));
+      
+      svg.append('line')
+        .attr('x1', x)
+        .attr('x2', x)
+        .attr('y1', timelineY - 5)
+        .attr('y2', timelineY + 5)
+        .attr('stroke', '#9ca3af')
+        .attr('stroke-width', 2);
+      
+      svg.append('text')
+        .attr('x', x)
+        .attr('y', timelineY + 30)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#6b7280')
+        .attr('font-weight', '600')
+        .attr('font-size', '14px')
+        .text(year);
+      
+      // Add year mask
+      clipPath.append('rect')
+        .attr('x', x - 20)
+        .attr('y', timelineY + 15)
+        .attr('width', 40)
+        .attr('height', 20)
+        .attr('fill', 'black');
+    });
+
+    // Draw lines (with clipping)
+    const linesGroup = svg.append('g').attr('clip-path', 'url(#line-clip)');
+    
+    processedEvents.forEach((event, index) => {
+      if (event.isFirstAtDate) {
+        // First event at this date: line from dot to label
+        linesGroup.append('line')
+          .attr('x1', event.x)
+          .attr('x2', event.x)
+          .attr('y1', timelineY)
+          .attr('y2', event.isAbove ? timelineY - (event.labelDistance + 20) : timelineY + (event.labelDistance + 20))
+          .attr('stroke', '#9ca3af')
+          .attr('stroke-width', 1.5);
+      } else {
+        // Subsequent events: line from previous label to this label
+        const prevEvent = processedEvents[index - 1];
+        const y1 = event.isAbove ? timelineY - (prevEvent.labelDistance + 20) : timelineY + (prevEvent.labelDistance + 20);
+        const y2 = event.isAbove ? timelineY - (event.labelDistance + 20) : timelineY + (event.labelDistance + 20);
+        
+        linesGroup.append('line')
+          .attr('x1', event.x)
+          .attr('x2', event.x)
+          .attr('y1', y1)
+          .attr('y2', y2)
+          .attr('stroke', '#9ca3af')
+          .attr('stroke-width', 1.5);
+      }
+    });
+
+    // Draw dots (one per unique date)
+    const dotGroups = svg.selectAll('.dot-group')
+      .data(uniqueDots)
+      .enter()
+      .append('g')
+      .attr('class', 'dot-group')
+      .attr('transform', d => `translate(${d.x}, ${timelineY})`);
+
+    dotGroups.append('circle')
+      .attr('r', 8)
+      .attr('fill', '#f97316')
+      .attr('cursor', 'pointer')
+      .attr('class', 'event-dot');
+
+    // Draw label boxes
+    const labelGroups = svg.selectAll('.label-group')
+      .data(processedEvents)
+      .enter()
+      .append('g')
+      .attr('class', 'label-group')
+      .attr('transform', d => {
+        const yPos = d.isAbove ? timelineY - (d.labelDistance + 20) : timelineY + (d.labelDistance + 20);
+        return `translate(${d.x}, ${yPos})`;
+      });
+
+    // Background rect for labels
+    labelGroups.append('rect')
+      .attr('class', 'label-bg')
+      .attr('x', -60)
+      .attr('y', d => d.isAbove ? -45 : 5)
+      .attr('width', 120)
+      .attr('height', 40)
+      .attr('rx', 8)
+      .attr('fill', 'white')
+      .attr('stroke', '#d1d5db')
+      .attr('stroke-width', 2)
+      .attr('cursor', 'pointer');
+
+    // Add label masks to clip path
+    processedEvents.forEach(event => {
+      const yPos = event.isAbove ? timelineY - (event.labelDistance + 20) : timelineY + (event.labelDistance + 20);
+      clipPath.append('rect')
+        .attr('x', event.x - 65)
+        .attr('y', event.isAbove ? yPos - 50 : yPos)
+        .attr('width', 130)
+        .attr('height', 50)
+        .attr('fill', 'black');
+    });
+
+    // Label text
+    labelGroups.append('text')
+      .attr('class', 'label-text')
+      .attr('text-anchor', 'middle')
+      .attr('y', d => d.isAbove ? -30 : 20)
+      .attr('font-size', '13px')
+      .attr('font-weight', '600')
+      .attr('fill', '#1f2937')
+      .text(d => d.label);
+
+    // Date text
+    labelGroups.append('text')
+      .attr('class', 'date-text')
+      .attr('text-anchor', 'middle')
+      .attr('y', d => d.isAbove ? -15 : 35)
+      .attr('font-size', '11px')
+      .attr('fill', '#6b7280')
+      .text(d => d.date);
+
+    // Description text (hidden by default)
+    labelGroups.append('text')
+      .attr('class', 'desc-text')
+      .attr('text-anchor', 'middle')
+      .attr('y', d => d.isAbove ? 0 : 50)
+      .attr('font-size', '12px')
+      .attr('fill', '#374151')
+      .style('opacity', 0)
+      .each(function(d) {
+        const words = d.description.split(' ');
+        const lines = [];
+        let currentLine = [];
+        
+        words.forEach(word => {
+          currentLine.push(word);
+          if (currentLine.join(' ').length > 30) {
+            lines.push(currentLine.join(' '));
+            currentLine = [];
+          }
+        });
+        if (currentLine.length > 0) {
+          lines.push(currentLine.join(' '));
+        }
+        
+        const textEl = d3.select(this);
+        lines.forEach((line, i) => {
+          textEl.append('tspan')
+            .attr('x', 0)
+            .attr('dy', i === 0 ? 0 : 14)
+            .text(line);
+        });
+      });
+
+    // Hover interactions on labels
+    labelGroups
+      .on('mouseenter', function(event, d) {
+        const group = d3.select(this);
+        
+        // Highlight associated dot
+        svg.selectAll('.dot-group')
+          .filter(dotData => dotData.x === d.x)
+          .select('.event-dot')
+          .transition()
+          .duration(200)
+          .attr('r', 10);
+        
+        // Expand label box
+        group.select('.label-bg')
+          .transition()
+          .duration(200)
+          .attr('x', -130)
+          .attr('width', 260)
+          .attr('height', 100)
+          .attr('stroke', '#f97316');
+        
+        // Show description
+        group.select('.desc-text')
+          .transition()
+          .duration(200)
+          .style('opacity', 1);
+      })
+      .on('mouseleave', function(event, d) {
+        const group = d3.select(this);
+        
+        // Reset dot
+        svg.selectAll('.dot-group')
+          .filter(dotData => dotData.x === d.x)
+          .select('.event-dot')
+          .transition()
+          .duration(200)
+          .attr('r', 8);
+        
+        // Reset label box
+        group.select('.label-bg')
+          .transition()
+          .duration(200)
+          .attr('x', -60)
+          .attr('width', 120)
+          .attr('height', 40)
+          .attr('stroke', '#d1d5db');
+        
+        // Hide description
+        group.select('.desc-text')
+          .transition()
+          .duration(200)
+          .style('opacity', 0);
+      });
+
+  }, []);
+
+  return (
+    <div className="app-shell">
+      <div ref={containerRef} className="timeline-wrapper">
+        <svg ref={svgRef}></svg>
+      </div>
+    </div>
+  );
+}
