@@ -45,17 +45,9 @@ export default function Timeline() {
     }
 
     const margin = { top: 120, right: 120, bottom: 120, left: 120 };
-    const height = 700;
+    const minHeight = 700;
     const innerWidth = 1400;
     const width = margin.left + innerWidth + margin.right;
-    const timelineY = height / 2;
-
-    pointerRef.current = [margin.left + innerWidth / 2, timelineY];
-    transformRef.current = d3.zoomIdentity;
-
-    const svg = d3.select(svgElement);
-    svg.selectAll('*').remove();
-    svg.attr('width', width).attr('height', height);
 
     const [minDate, maxDate] = d3.extent(events, (event) => event.parsedDate);
     if (!minDate || !maxDate) {
@@ -116,35 +108,70 @@ export default function Timeline() {
     const expandedItemWidth = 400;
     const baseOffset = 140;
     const levelOffset = 70;
+    const stackLinkOffset = 0;
+    const stackCardOffset = 14;
 
     const processedYears = yearEntries.map((entry, index) => {
       const level = verticalLevels[index] ?? 1;
       const isAbove = level >= 0;
       const stackOffset = baseOffset + Math.max(0, Math.abs(level) - 1) * levelOffset;
-      const processedEvents = entry.events.map((event, stackIndex) => ({
-        ...event,
-        yearKey: entry.year,
-        stackIndex,
-        isAbove,
-        baseWidth: baseItemWidth,
-        expandedWidth: expandedItemWidth,
-        itemHeight,
-        stackSpacing,
-        stackOffset,
-        monthLabel: monthFormat(event.parsedDate),
-      }));
-      const stackHeight = Math.max(0, (processedEvents.length - 1) * stackSpacing);
+      const processedEvents = entry.events.map((event, stackIndex) => {
+        const stackY = stackIndex * stackSpacing;
+        return {
+          ...event,
+          yearKey: entry.year,
+          stackIndex,
+          isAbove,
+          baseWidth: baseItemWidth,
+          expandedWidth: expandedItemWidth,
+          itemHeight,
+          stackSpacing,
+          stackOffset,
+          stackY,
+          centerY: stackY + itemHeight / 2,
+          monthLabel: monthFormat(event.parsedDate),
+        };
+      });
+      const totalHeight = processedEvents.length > 0
+        ? ((processedEvents.length - 1) * stackSpacing) + itemHeight
+        : 0;
+      const firstConnectorOffset = processedEvents[0]?.centerY ?? 0;
+      const lastConnectorOffset = processedEvents.length > 0
+        ? processedEvents[processedEvents.length - 1]?.centerY ?? 0
+        : 0;
       return {
         ...entry,
         level,
         isAbove,
         stackOffset,
         stackSpacing,
-        stackHeight,
+        totalHeight,
         itemHeight,
+        firstConnectorOffset,
+        lastConnectorOffset,
         events: processedEvents,
       };
     });
+
+    const aboveDepth = d3.max(processedYears
+      .filter((year) => year.isAbove)
+      .map((year) => year.stackOffset + year.totalHeight)) ?? (baseOffset + itemHeight);
+    const belowDepth = d3.max(processedYears
+      .filter((year) => !year.isAbove)
+      .map((year) => year.stackOffset + year.totalHeight)) ?? (baseOffset + itemHeight);
+
+    const computedTimelineY = margin.top + aboveDepth;
+    const computedHeight = computedTimelineY + belowDepth + margin.bottom;
+    const height = Math.max(minHeight, computedHeight);
+    const extraSpace = height - computedHeight;
+    const timelineY = computedTimelineY + (extraSpace / 2);
+
+    pointerRef.current = [margin.left + innerWidth / 2, timelineY];
+    transformRef.current = d3.zoomIdentity;
+
+    const svg = d3.select(svgElement);
+    svg.selectAll('*').remove();
+    svg.attr('width', width).attr('height', height);
 
     const rootGroup = svg.append('g').attr('class', 'timeline-root');
 
@@ -207,11 +234,11 @@ export default function Timeline() {
       .attr('class', 'stack-item')
       .attr('cursor', 'pointer');
 
-    stackItems.attr('transform', (d) => `translate(0, ${d.stackIndex * d.stackSpacing})`);
+    stackItems.attr('transform', (d) => `translate(0, ${d.stackY})`);
 
     stackItems.append('rect')
       .attr('class', 'stack-bg')
-      .attr('x', (d) => -(d.baseWidth / 2))
+      .attr('x', stackCardOffset)
       .attr('y', 0)
       .attr('width', (d) => d.baseWidth)
       .attr('height', (d) => d.itemHeight)
@@ -223,7 +250,7 @@ export default function Timeline() {
     stackItems.append('text')
       .attr('class', 'stack-label')
       .attr('text-anchor', 'start')
-      .attr('x', (d) => -(d.baseWidth / 2) + 16)
+      .attr('x', stackCardOffset + 16)
       .attr('y', 24)
       .attr('font-size', '13px')
       .attr('font-weight', '600')
@@ -233,7 +260,7 @@ export default function Timeline() {
     stackItems.append('text')
       .attr('class', 'stack-month')
       .attr('text-anchor', 'start')
-      .attr('x', (d) => -(d.baseWidth / 2) + 16)
+      .attr('x', stackCardOffset + 16)
       .attr('y', (d) => d.itemHeight - 12)
       .attr('font-size', '11px')
       .attr('fill', '#6b7280')
@@ -242,7 +269,7 @@ export default function Timeline() {
     stackItems.append('text')
       .attr('class', 'stack-desc')
       .attr('text-anchor', 'start')
-      .attr('x', (d) => -(d.expandedWidth / 2) + d.baseWidth + 16)
+      .attr('x', 0)
       .attr('y', 22)
       .attr('font-size', '12px')
       .attr('fill', '#374151')
@@ -266,7 +293,7 @@ export default function Timeline() {
           lines.push(currentLine.join(' '));
         }
 
-        const descX = -(d.expandedWidth / 2) + d.baseWidth + 16;
+        const descX = stackCardOffset + d.baseWidth + 24;
         lines.forEach((line, index) => {
           textEl.append('tspan')
             .attr('x', descX)
@@ -274,6 +301,78 @@ export default function Timeline() {
             .text(line);
         });
       });
+
+    stackItems.each(function adjustStackDimensions(datum) {
+      const group = d3.select(this);
+      const rect = group.select('.stack-bg');
+      const labelNode = group.select('.stack-label').node();
+      const monthNode = group.select('.stack-month').node();
+      const descNode = group.select('.stack-desc').node();
+
+      const labelWidth = labelNode ? labelNode.getBBox().width : 0;
+      const monthWidth = monthNode ? monthNode.getBBox().width : 0;
+      const descBBox = descNode ? descNode.getBBox() : { width: 0, height: 0 };
+
+      const contentWidth = Math.max(labelWidth, monthWidth);
+      const baseWidth = Math.max(baseItemWidth, contentWidth + 32);
+      const descWidth = descBBox.width;
+      const expandedWidth = Math.max(expandedItemWidth, baseWidth + descWidth + 40);
+      const descOffset = stackCardOffset + baseWidth + 24;
+
+      datum.baseWidth = baseWidth;
+      datum.expandedWidth = expandedWidth;
+      datum.descOffset = descOffset;
+
+      rect
+        .attr('x', stackCardOffset)
+        .attr('width', baseWidth);
+
+      group.select('.stack-desc')
+        .attr('x', descOffset)
+        .selectAll('tspan')
+        .attr('x', descOffset);
+    });
+
+    stackGroups
+      .filter((d) => d.events.length > 1)
+      .append('line')
+      .attr('class', 'stack-rail')
+      .attr('x1', stackLinkOffset)
+      .attr('x2', stackLinkOffset)
+      .attr('y1', 0)
+      .attr('y2', (d) => Math.max(0, d.totalHeight))
+      .attr('stroke', '#cbd5f5')
+      .attr('stroke-width', 1.5)
+      .attr('stroke-dasharray', '4 3')
+      .lower();
+
+    stackGroups.selectAll('.stack-hook')
+      .data((d) => d.events.map((event) => ({
+        yearKey: d.year,
+        y: event.stackY + event.itemHeight / 2,
+      })))
+      .enter()
+      .append('line')
+      .attr('class', 'stack-hook')
+      .attr('x1', stackLinkOffset)
+      .attr('x2', stackCardOffset)
+      .attr('y1', (seg) => seg.y)
+      .attr('y2', (seg) => seg.y)
+      .attr('stroke', '#cbd5f5')
+      .attr('stroke-width', 1.5)
+      .attr('stroke-dasharray', '4 3')
+      .lower();
+
+    const setConnectorStroke = (year, strokeValue, duration = 200) => {
+      const line = connectorByYear.get(year);
+      if (!line) {
+        return;
+      }
+      line
+        .transition()
+        .duration(duration)
+        .attr('stroke', strokeValue);
+    };
 
     stackItems
       .on('mouseenter', function handleMouseEnter(event, datum) {
@@ -287,21 +386,21 @@ export default function Timeline() {
           .duration(200)
           .attr('r', 10);
 
-        connectorByYear.get(datum.yearKey)
-          ?.transition()
+        setConnectorStroke(datum.yearKey, '#94a3d8');
+
+        d3.select(this.parentNode)
+          .selectAll('.stack-rail, .stack-hook')
+          .transition()
           .duration(200)
           .attr('stroke', '#94a3d8');
 
         const group = d3.select(this);
         const rect = group.select('.stack-bg');
         const desc = group.select('.stack-desc');
-        const expandedX = -(datum.expandedWidth) / 2;
-        const descX = -(datum.expandedWidth / 2) + datum.baseWidth + 16;
 
         rect
           .transition()
           .duration(200)
-          .attr('x', expandedX)
           .attr('width', datum.expandedWidth)
           .attr('stroke', '#f97316');
 
@@ -311,7 +410,7 @@ export default function Timeline() {
           .style('opacity', 1);
 
         desc.selectAll('tspan')
-          .attr('x', descX);
+          .attr('x', datum.descOffset);
       })
       .on('mouseleave', function handleMouseLeave(event, datum) {
         const group = d3.select(this);
@@ -324,15 +423,17 @@ export default function Timeline() {
           .duration(200)
           .attr('r', 8);
 
-        connectorByYear.get(datum.yearKey)
-          ?.transition()
+        setConnectorStroke(datum.yearKey, '#cbd5f5');
+
+        d3.select(this.parentNode)
+          .selectAll('.stack-rail, .stack-hook')
+          .transition()
           .duration(200)
           .attr('stroke', '#cbd5f5');
 
         rect
           .transition()
           .duration(200)
-          .attr('x', -(datum.baseWidth) / 2)
           .attr('width', datum.baseWidth)
           .attr('stroke', '#d1d5db');
 
@@ -340,6 +441,9 @@ export default function Timeline() {
           .transition()
           .duration(200)
           .style('opacity', 0);
+
+        desc.selectAll('tspan')
+          .attr('x', datum.descOffset);
       });
 
     const yearTicks = d3.timeYear.range(
@@ -373,13 +477,21 @@ export default function Timeline() {
       const currentScale = zoomTransform.rescaleX(baseScale);
 
       const positionX = (date) => margin.left + currentScale(date);
-      const stackBaseY = (yearData) => {
-        const stackHeight = yearData.stackHeight;
-        const itemHeightLocal = yearData.itemHeight;
+      const stackTopY = (yearData) => {
         if (yearData.isAbove) {
-          return timelineY - yearData.stackOffset - stackHeight - (itemHeightLocal / 2);
+          return timelineY - yearData.stackOffset - yearData.totalHeight;
         }
-        return timelineY + yearData.stackOffset - (itemHeightLocal / 2);
+        return timelineY + yearData.stackOffset;
+      };
+      const stackAnchorX = (yearData) => positionX(yearData.parsedYearDate);
+      const connectorEndY = (yearData) => {
+        if (yearData.events.length === 0) {
+          return timelineY;
+        }
+        if (yearData.isAbove) {
+          return stackTopY(yearData) + (yearData.firstConnectorOffset ?? 0);
+        }
+        return stackTopY(yearData) + (yearData.lastConnectorOffset ?? 0);
       };
 
       axisLine
@@ -390,15 +502,13 @@ export default function Timeline() {
         .attr('x1', (d) => positionX(d.parsedYearDate))
         .attr('x2', (d) => positionX(d.parsedYearDate))
         .attr('y1', timelineY)
-        .attr('y2', (d) => (d.isAbove
-          ? timelineY - d.stackOffset
-          : timelineY + d.stackOffset));
+        .attr('y2', (d) => connectorEndY(d));
 
       dotGroups
         .attr('transform', (d) => `translate(${positionX(d.parsedYearDate)}, ${timelineY})`);
 
       stackGroups
-        .attr('transform', (d) => `translate(${positionX(d.parsedYearDate)}, ${stackBaseY(d)})`);
+        .attr('transform', (d) => `translate(${stackAnchorX(d)}, ${stackTopY(d)})`);
 
       yearMarkers
         .attr('transform', (d) => `translate(${positionX(d)}, 0)`);
