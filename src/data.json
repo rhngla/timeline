@@ -1,0 +1,153 @@
+
+[
+  {
+    "date": "Jan 1938",
+    "label": "Spemann proposes nuclear transfer",
+    "description": "Conceptual basis for testing nuclear potential in development."
+  },
+  {
+    "date": "Jan 1952",
+    "label": "Somatic nuclear transfer in frogs",
+    "description": "Briggs & King show embryonic nuclei can direct development."
+  },
+  {
+    "date": "Jan 1962",
+    "label": "Gurdon reprograms differentiated cells",
+    "description": "Mature frog nuclei generate tadpoles, proving genomic equivalence."
+  },
+  {
+    "date": "Jan 1987",
+    "label": "MyoD discovery",
+    "description": "Weintraub identifies a transcription factor converting fibroblasts into muscle cells."
+  },
+  {
+    "date": "Jul 1996",
+    "label": "Cloning of Dolly the sheep",
+    "description": "Wilmut demonstrates reprogramming of adult nuclei in mammals."
+  },
+  {
+    "date": "Oct 1988",
+    "label": "Leah born",
+    "description": "A little snack for me 🍫"
+  },
+  {
+    "date": "Nov 1998",
+    "label": "Illumina founded",
+    "description": "Genomics company developing sequencing and array-based technologies."
+  },
+  {
+    "date": "Jan 2001",
+    "label": "Human embryonic stem cell culture defined",
+    "description": "Enabled long-term propagation of human ESCs."
+  },
+  {
+    "date": "Dec 2002",
+    "label": "First draft of mouse genome",
+    "description": "Mouse Genome Sequencing Consortium publishes C57BL/6J genome."
+  },
+  {
+    "date": "Apr 2003",
+    "label": "Human Genome Project completed",
+    "description": "International effort finishes the reference human genome."
+  },
+  {
+    "date": "Jun 2003",
+    "label": "ENCODE project launched",
+    "description": "NIH begins cataloging functional elements in the human genome."
+  },
+  {
+    "date": "Sep 2003",
+    "label": "Allen Institute founded",
+    "description": "Funded by Paul G. Allen to advance neuroscience."
+  },
+  {
+    "date": "Aug 2005",
+    "label": "Optogenetics demonstration",
+    "description": "Deisseroth lab shows optical control of neurons using channelrhodopsin-2."
+  },
+  {
+    "date": "Aug 2006",
+    "label": "Yamanaka factors discovered",
+    "description": "Four transcription factors reprogram somatic cells into iPSCs."
+  },
+  {
+    "date": "Dec 2007",
+    "label": "CRISPR adaptive immune function discovered",
+    "description": "Barrangou et al. reveal CRISPR\u2019s role in bacterial immunity."
+  },
+  {
+    "date": "Dec 2007",
+    "label": "Human iPSCs created",
+    "description": "Thomson and Yamanaka reprogram human somatic cells."
+  },
+  {
+    "date": "Jul 2009",
+    "label": "Single-cell RNA-seq demonstrated",
+    "description": "Tang et al. sequence transcriptomes from single mammalian cells."
+  },
+  {
+    "date": "Apr 2013",
+    "label": "Brain clearing (CLARITY) developed",
+    "description": "Deisseroth lab renders intact tissue transparent for 3D imaging."
+  },
+  {
+    "date": "Jan 2015",
+    "label": "Expansion microscopy introduced",
+    "description": "Boyden lab expands fixed tissue for nanoscale imaging."
+  },
+  {
+    "date": "Aug 2015",
+    "label": "Single-cell ATAC-seq developed",
+    "description": "Buenrostro et al. map chromatin accessibility at single-cell resolution."
+  },
+  {
+    "date": "Dec 2015",
+    "label": "Chan Zuckerberg Initiative founded",
+    "description": "Funded by Mark Zuckerberg and Priscilla Chan to support science and education."
+  },
+  {
+    "date": "Jan 2017",
+    "label": "Cellarity founded",
+    "description": "Flagship Pioneering launches cell-behavior-driven drug discovery company."
+  },
+  {
+    "date": "Apr 2017",
+    "label": "10x Genomics founded",
+    "description": "Company commercializes single-cell and spatial omics platforms."
+  },
+  {
+    "date": "Sep 2021",
+    "label": "Arc Institute founded",
+    "description": "Philanthropically backed biomedical research institute."
+  },
+  {
+    "date": "Dec 2021",
+    "label": "NewLimit founded",
+    "description": "Longevity biotech focused on epigenetic reprogramming."
+  },
+  {
+    "date": "Jan 2022",
+    "label": "Altos Labs founded",
+    "description": "Privately funded company researching cellular rejuvenation."
+  },
+  {
+    "date": "Jul 2022",
+    "label": "Ultima Genomics founded",
+    "description": "DNA sequencing company developing ultra-low-cost sequencing technology."
+  },
+  {
+    "date": "Jun 2023",
+    "label": "Somite AI founded",
+    "description": "Venture-backed AI-driven drug discovery startup."
+  },
+  {
+    "date": "Apr 2024",
+    "label": "Tahoe 100M program announced",
+    "description": "Large-scale initiative focused on molecular rejuvenation and reprogramming research."
+  },
+  {
+    "date": "Sep 2024",
+    "label": "Tahoe Therapeutics founded",
+    "description": "Biotech startup translating reprogramming and rejuvenation science into therapeutics."
+  }
+]

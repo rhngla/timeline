@@ -1,32 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
-
-const RAW_EVENTS = [
-  { date: 'Jan 1950', label: 'Idea Sparked', description: 'Founders aligned around a bold vision during weekend experiments.' },
-  { date: 'Aug 1954', label: 'First Workshop', description: 'A small lab was built to explore early prototypes and materials.' },
-  { date: 'Mar 1962', label: 'Research Breakthrough', description: 'Discovered a novel approach that made the core concept viable.' },
-  { date: 'Sep 1970', label: 'Company Incorporated', description: 'Formal incorporation with five employees and a single product idea.' },
-  { date: 'Jul 1976', label: 'First Product', description: 'Released the inaugural device that gained traction with hobbyists.' },
-  { date: 'Nov 1983', label: 'International Debut', description: 'Opened limited distribution in Europe after industry conference buzz.' },
-  { date: 'May 1988', label: 'Series A', description: 'Secured strategic capital to scale manufacturing capabilities.' },
-  { date: 'Oct 1992', label: 'Strategic Partnership', description: 'Signed landmark deal with a major electronics maker.' },
-  { date: 'Jan 1996', label: 'Online Presence', description: 'Launched the first website with digital catalog and ordering.' },
-  { date: 'Sep 1998', label: '100K Customers', description: 'Surpassed six figures in lifetime customers driven by mail campaigns.' },
-  { date: 'Feb 2000', label: 'Dot-Com Launch', description: 'Rebuilt platform to support transactions and community features.' },
-  { date: 'Nov 2001', label: 'Beta Program', description: 'Invited early adopters to shape the second generation product.' },
-  { date: 'Jun 2003', label: 'Series B', description: 'Raised $15M to expand R&D and recruit engineering talent.' },
-  { date: 'Mar 2005', label: 'Flagship Release', description: 'Shipped the modern flagship product with modular architecture.' },
-  { date: 'Jan 2006', label: 'Developer API', description: 'Opened APIs so partners could build on top of platform services.' },
-  { date: 'Sep 2007', label: 'Mobile App', description: 'Debuted a mobile companion that quickly became core to usage.' },
-  { date: 'Apr 2009', label: 'Cloud Platform', description: 'Transitioned backend to a scalable cloud-native foundation.' },
-  { date: 'Dec 2010', label: 'Public Listing', description: 'Completed IPO and rang the bell on the NASDAQ exchange.' },
-  { date: 'Aug 2013', label: 'Global Expansion', description: 'Opened offices in APAC and localized product experience.' },
-  { date: 'Jan 2016', label: 'AI Research Lab', description: 'Formed internal lab to explore applied machine learning.' },
-  { date: 'Jun 2019', label: '1M Users', description: 'Celebrated one million active accounts across all products.' },
-  { date: 'Apr 2021', label: 'Next Platform', description: 'Launched platform redesign focused on reliability and speed.' },
-  { date: 'Nov 2023', label: 'Sustainability', description: 'Committed to net-zero operations with verified offsets.' },
-  { date: 'May 2025', label: 'Future Labs', description: 'Announced next-generation experimentation space for creators.' },
-];
+import rawEvents from './data.json';
 
 const parseDate = (dateStr) => {
   const [month, year] = dateStr.split(' ');
@@ -61,10 +35,14 @@ export default function Timeline() {
       return;
     }
 
-    const events = RAW_EVENTS.map((event) => ({
+    const events = rawEvents.map((event) => ({
       ...event,
       parsedDate: parseDate(event.date),
     })).sort((a, b) => a.parsedDate - b.parsedDate);
+
+    if (events.length === 0) {
+      return;
+    }
 
     const margin = { top: 120, right: 120, bottom: 120, left: 120 };
     const height = 700;
@@ -79,8 +57,12 @@ export default function Timeline() {
     svg.selectAll('*').remove();
     svg.attr('width', width).attr('height', height);
 
-    const timelineStart = parseDate('Jan 1950');
-    const timelineEnd = parseDate('Dec 2025');
+    const [minDate, maxDate] = d3.extent(events, (event) => event.parsedDate);
+    if (!minDate || !maxDate) {
+      return;
+    }
+    const timelineStart = d3.timeYear.offset(minDate, -1);
+    const timelineEnd = d3.timeYear.offset(maxDate, 1);
     const baseScale = d3.scaleTime()
       .domain([timelineStart, timelineEnd])
       .range([0, innerWidth]);
