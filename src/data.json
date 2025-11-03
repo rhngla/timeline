@@ -1,44 +1,44 @@
 
 [
   {
-    "date": "Jan 1938",
-    "label": "Spemann proposes nuclear transfer",
-    "description": "Conceptual basis for testing nuclear potential in development."
-  },
-  {
     "date": "Jan 1952",
-    "label": "Somatic nuclear transfer in frogs",
-    "description": "Briggs & King show embryonic nuclei can direct development."
+    "label": "Somatic cell nuclear transfer (frog)",
+    "description": "Somatic (i.e. not egg or sperm) cells can retain potential for totipotency. (Briggs & King)"
   },
   {
-    "date": "Jan 1962",
-    "label": "Gurdon reprograms differentiated cells",
-    "description": "Mature frog nuclei generate tadpoles, proving genomic equivalence."
+    "date": "Dec 1962",
+    "label": "Differentiated cell nuclear transfer (frog)",
+    "description": "Differentiated cells (more specialized somatic cells) can retain potential for totipotency (Gurdon)."
   },
   {
-    "date": "Jan 1987",
-    "label": "MyoD discovery",
-    "description": "Weintraub identifies a transcription factor converting fibroblasts into muscle cells."
+    "date": "Dec 1982",
+    "label": "First transgenic mouse",
+    "description": "Novel genomic elements inserted into the mouse genome (Palmiter)."
   },
   {
-    "date": "Jul 1996",
-    "label": "Cloning of Dolly the sheep",
-    "description": "Wilmut demonstrates reprogramming of adult nuclei in mammals."
+    "date": "Dec 1987",
+    "label": "Single tf can reprogram cells",
+    "description": "A single transcription factor (MyoD) can convert one mature cell type into another (Weintraub, @ Fred Hutch)."
   },
   {
-    "date": "Oct 1988",
-    "label": "Leah born",
-    "description": "A little snack for me 🍫"
+    "date": "Nov 1989",
+    "label": "First knockout mouse",
+    "description": "Early technology in 1987, demonstration of mouse without a targeted gene in 1989. (Capecchi, Evans, Smithies)."
   },
   {
-    "date": "Nov 1998",
+    "date": "Oct 1990",
+    "label": "Human genome project launched",
+    "description": "Model organisms chosen alongside human - E. coli, yeast, fruit fly, nematode, mouse"
+  },
+  {
+    "date": "Feb 1996",
+    "label": "Dolly the sheep",
+    "description": "Viable offspring derived from fetal and adult mammalian cells (Wilmut et al.)"
+  },
+  {
+    "date": "Apr 1998",
     "label": "Illumina founded",
-    "description": "Genomics company developing sequencing and array-based technologies."
-  },
-  {
-    "date": "Jan 2001",
-    "label": "Human embryonic stem cell culture defined",
-    "description": "Enabled long-term propagation of human ESCs."
+    "description": "Makes sequencers, reagents, and consumables."
   },
   {
     "date": "Dec 2002",
