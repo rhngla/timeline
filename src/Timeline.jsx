@@ -1,5 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
+import DOMPurify from 'dompurify';
+import { marked } from 'marked';
 import rawEvents from './data.json';
 
 const MONTH_INDEX = {
@@ -99,12 +101,42 @@ const parseDate = (value) => {
   return null;
 };
 
-const sanitizeDescription = (value) => {
+let purifierInstance = null;
+const getPurifier = () => {
+  if (purifierInstance) {
+    return purifierInstance;
+  }
+  if (typeof window === 'undefined') {
+    purifierInstance = { sanitize: (html) => html };
+    return purifierInstance;
+  }
+  if (typeof DOMPurify.sanitize === 'function') {
+    purifierInstance = DOMPurify;
+    return purifierInstance;
+  }
+  purifierInstance = DOMPurify(window);
+  return purifierInstance;
+};
+
+const processDescription = (value) => {
   if (typeof value !== 'string') {
-    return '';
+    return { text: '', html: '' };
   }
   const trimmed = value.trim();
-  return trimmed.length > 0 ? trimmed : '';
+  if (!trimmed) {
+    return { text: '', html: '' };
+  }
+
+  const rawHtml = marked.parse(trimmed, { breaks: true });
+  const purifier = getPurifier();
+  const html = purifier && typeof purifier.sanitize === 'function'
+    ? purifier.sanitize(rawHtml)
+    : rawHtml;
+
+  return {
+    text: trimmed,
+    html,
+  };
 };
 
 const calculateVerticalLevels = (entries, getPosition, minSpacing) => {
@@ -173,10 +205,12 @@ export default function Timeline() {
         if (!parsedDate) {
           return null;
         }
+        const { text: descriptionText, html: descriptionHtml } = processDescription(event.description);
         return {
           ...event,
           parsedDate,
-          description: sanitizeDescription(event.description),
+          descriptionText,
+          descriptionHtml,
         };
       })
       .filter(Boolean)
@@ -224,7 +258,9 @@ export default function Timeline() {
         const stackY = stackIndex * layoutConfig.stack.spacing;
         return {
           ...event,
-          description: event.description,
+          descriptionHtml: event.descriptionHtml,
+          descriptionText: event.descriptionText,
+          hasDescription: Boolean(event.descriptionHtml),
           yearKey: entry.year,
           stackIndex,
           isAbove,
@@ -379,57 +415,27 @@ export default function Timeline() {
       .attr('fill', '#6b7280')
       .text((d) => `${d.monthLabel} ${d.parsedDate.getFullYear()}`);
 
-    stackItems.append('text')
-      .attr('class', 'stack-desc')
-      .attr('text-anchor', 'start')
-      .attr('x', 0)
-      .attr('y', 22)
-      .attr('font-size', '12px')
-      .attr('fill', '#374151')
+    stackItems.append('foreignObject')
+      .attr('class', 'stack-desc-foreign')
+      .attr('x', layoutConfig.stack.cardOffset)
+      .attr('y', 8)
+      .attr('width', 0)
+      .attr('height', layoutConfig.stack.itemHeight - 16)
       .style('opacity', 0)
       .style('pointer-events', 'none')
-      .each(function wrapDescription(d) {
-        const textEl = d3.select(this);
-        const description = d.description;
+      .each(function setupDescription(d) {
+        const foreign = d3.select(this);
+        const container = foreign.append('xhtml:div')
+          .attr('class', 'timeline-description')
+          .attr('role', 'presentation');
 
-        if (!description) {
-          textEl.text('');
-          textEl.classed('has-content', false);
-          return;
+        if (d.hasDescription) {
+          container.html(d.descriptionHtml);
+          foreign.classed('has-content', true);
+        } else {
+          container.text('');
+          foreign.classed('has-content', false);
         }
-
-        textEl.text('');
-        textEl.classed('has-content', true);
-        const words = description.split(/\s+/);
-        const maxWidth = layoutConfig.description.maxWidth;
-        const lineHeight = layoutConfig.description.lineHeight;
-
-        let lineWords = [];
-        let tspan = textEl.append('tspan').attr('dy', 0);
-
-        words.forEach((word, wordIndex) => {
-          if (!word) {
-            return;
-          }
-          const currentWords = [...lineWords, word];
-          tspan.text(currentWords.join(' '));
-
-          const textLength = tspan.node().getComputedTextLength();
-          if (textLength <= maxWidth || lineWords.length === 0) {
-            lineWords = currentWords;
-            return;
-          }
-
-          tspan.text(lineWords.join(' '));
-          lineWords = [word];
-          tspan = textEl.append('tspan')
-            .attr('dy', lineHeight)
-            .text(word);
-
-          if (wordIndex === words.length - 1 && tspan.node().getComputedTextLength() > maxWidth) {
-            tspan.text(word.slice(0, Math.max(3, Math.floor(maxWidth / 6))));
-          }
-        });
       });
 
     stackItems.each(function adjustStackDimensions(datum) {
@@ -437,20 +443,15 @@ export default function Timeline() {
       const rect = group.select('.stack-bg');
       const labelNode = group.select('.stack-label').node();
       const monthNode = group.select('.stack-month').node();
-      const descNode = group.select('.stack-desc').node();
+      const descForeign = group.select('.stack-desc-foreign');
 
       const labelWidth = labelNode ? labelNode.getBBox().width : 0;
       const monthWidth = monthNode ? monthNode.getBBox().width : 0;
       const contentWidth = Math.max(labelWidth, monthWidth);
       const baseWidth = Math.max(layoutConfig.stack.baseWidth, contentWidth + 32);
 
-      let descWidth = 0;
-      if (descNode && descNode.textContent.trim().length > 0) {
-        const descBox = descNode.getBBox();
-        descWidth = Math.min(descBox.width, layoutConfig.description.maxWidth);
-      }
-
-      const descOffset = layoutConfig.stack.cardOffset + baseWidth + layoutConfig.description.gap;
+      const descWidth = datum.hasDescription ? layoutConfig.description.maxWidth : 0;
+      const descOffset = layoutConfig.stack.cardOffset + baseWidth + (datum.hasDescription ? layoutConfig.description.gap : 0);
       const expandedWidth = Math.max(
         layoutConfig.stack.minExpandedWidth,
         baseWidth + (descWidth > 0 ? layoutConfig.description.gap + descWidth : 0),
@@ -459,15 +460,23 @@ export default function Timeline() {
       datum.baseWidth = baseWidth;
       datum.expandedWidth = expandedWidth;
       datum.descOffset = descOffset;
+      datum.descWidth = descWidth;
 
       rect
         .attr('x', layoutConfig.stack.cardOffset)
         .attr('width', baseWidth);
 
-      group.select('.stack-desc')
-        .attr('x', descOffset)
-        .selectAll('tspan')
-        .attr('x', descOffset);
+      if (datum.hasDescription) {
+        descForeign
+          .attr('x', descOffset)
+          .attr('width', descWidth)
+          .attr('height', layoutConfig.stack.itemHeight - 16);
+      } else {
+        descForeign
+          .attr('x', layoutConfig.stack.cardOffset + baseWidth)
+          .attr('width', 0)
+          .attr('height', layoutConfig.stack.itemHeight - 16);
+      }
     });
 
     stackGroups
@@ -550,7 +559,7 @@ export default function Timeline() {
 
         const group = d3.select(this);
         const rect = group.select('.stack-bg');
-        const desc = group.select('.stack-desc');
+        const desc = group.select('.stack-desc-foreign');
 
         group.raise();
 
@@ -562,12 +571,16 @@ export default function Timeline() {
 
         if (desc.classed('has-content')) {
           desc
+            .style('pointer-events', 'auto')
+            .attr('x', datum.descOffset)
+            .attr('width', datum.descWidth || layoutConfig.description.maxWidth)
+            .attr('height', layoutConfig.stack.itemHeight - 16)
+            .raise();
+
+          desc
             .transition()
             .duration(transitionDuration)
             .style('opacity', 1);
-
-          desc.selectAll('tspan')
-            .attr('x', datum.descOffset);
         }
       })
       .on('mouseleave', function handleMouseLeave(event, datum) {
@@ -575,7 +588,7 @@ export default function Timeline() {
 
         const group = d3.select(this);
         const rect = group.select('.stack-bg');
-        const desc = group.select('.stack-desc');
+        const desc = group.select('.stack-desc-foreign');
 
         rect
           .transition()
@@ -588,6 +601,9 @@ export default function Timeline() {
             .transition()
             .duration(transitionDuration)
             .style('opacity', 0);
+
+          desc
+            .style('pointer-events', 'none');
         }
       });
 

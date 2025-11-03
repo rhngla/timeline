@@ -96,3 +96,58 @@ body {
 .zoom-button.reset:hover {
   box-shadow: 0 18px 28px -10px rgba(249, 115, 22, 0.45);
 }
+
+.stack-desc-foreign {
+  overflow: visible;
+}
+
+.timeline-description {
+  font-size: 12px;
+  line-height: 1.4;
+  color: #374151;
+  max-height: 100%;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+  white-space: normal;
+}
+
+.timeline-description p,
+.timeline-description ul,
+.timeline-description ol,
+.timeline-description pre {
+  margin: 0 0 0.45rem;
+}
+
+.timeline-description ul,
+.timeline-description ol {
+  padding-left: 1.1rem;
+}
+
+.timeline-description code,
+.timeline-description pre {
+  font-family: 'Source Code Pro', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  background: #f3f4f6;
+  border-radius: 4px;
+}
+
+.timeline-description code {
+  padding: 0.1rem 0.25rem;
+}
+
+.timeline-description pre {
+  padding: 0.5rem;
+  overflow-x: auto;
+}
+
+.timeline-description::-webkit-scrollbar {
+  width: 6px;
+}
+
+.timeline-description::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.timeline-description::-webkit-scrollbar-thumb {
+  background: rgba(107, 114, 128, 0.5);
+  border-radius: 999px;
+}
