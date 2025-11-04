@@ -3,7 +3,7 @@
   {
     "date": "Jan 1952",
     "label": "Somatic cell nuclear transfer (frog)",
-    "description": "Somatic (i.e. not egg or sperm) cells can retain potential for totipotency. (Briggs & King) [link](addr) ![Alt text](https://images.squarespace-cdn.com/content/v1/56acc1138a65e2a286012c54/1476623632079-BBAERA9UGQ0EODC6680U/pixabaytest6-7.jpg?format=2500w)"
+    "description": "Somatic (i.e. not egg or sperm) cells can retain potential for totipotency. (Briggs & King)"
   },
   {
     "date": "Dec 1962",
@@ -67,87 +67,142 @@
   },
   {
     "date": "Aug 2006",
-    "label": "Yamanaka factors discovered",
-    "description": "Four transcription factors reprogram somatic cells into iPSCs."
+    "label": "Yamanaka factors",
+    "description": "Discovered four transcription factors that can reprogram somatic cells into iPSCs."
   },
   {
-    "date": "Dec 2007",
-    "label": "CRISPR adaptive immune function discovered",
-    "description": "Barrangou et al. reveal CRISPR\u2019s role in bacterial immunity."
+    "date": "June 2012",
+    "label": "CRISPR for genome editing",
+    "description": "Doudna and Charpentier show _in vitro_ DNA editing."
   },
   {
-    "date": "Dec 2007",
-    "label": "Human iPSCs created",
-    "description": "Thomson and Yamanaka reprogram human somatic cells."
+    "date": "Jun 2009",
+    "label": "ImageNet benchmark",
+    "description": "Eventually this dataset becomes part of ILSVRC, and drives benchmarking of computer vision algorithms."
   },
   {
     "date": "Jul 2009",
-    "label": "Single-cell RNA-seq demonstrated",
+    "label": "Single-cell mRNA-seq",
     "description": "Tang et al. sequence transcriptomes from single mammalian cells."
   },
   {
+    "date": "July 2012",
+    "label": "10x Genomics inc.",
+    "description": "Company commercializes single-cell and spatial omics platforms."
+  },
+  {
+    "date": "Dec 2012",
+    "label": "AlexNet → Deep Learning",
+    "description": "Step jump in image classification, sparks deep learning revolution in computer vision."
+  },
+  {
     "date": "Apr 2013",
-    "label": "Brain clearing (CLARITY) developed",
-    "description": "Deisseroth lab renders intact tissue transparent for 3D imaging."
+    "label": "CLARITY (Brain clearing)",
+    "description": "Enables intact tissue 3D optical imaging."
+  },
+  {
+    "date": "Jun 2013",
+    "label": "Horvath clock",
+    "description": "Epigenetic profiles are predictive of age. Horvath clocks identified ~350 methylation sites that collectively predict chronological age for tissues/celltypes. ([Horvath](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2013-14-10-r115))."
+  },
+  {
+    "date": "Dec 2013",
+    "label": "Autoencoding variational Bayes",
+    "description": "VAE first introduced."
   },
   {
     "date": "Jan 2015",
-    "label": "Expansion microscopy introduced",
+    "label": "Expansion microscopy",
     "description": "Boyden lab expands fixed tissue for nanoscale imaging."
   },
   {
     "date": "Aug 2015",
-    "label": "Single-cell ATAC-seq developed",
+    "label": "Single-cell ATAC-seq",
     "description": "Buenrostro et al. map chromatin accessibility at single-cell resolution."
   },
   {
     "date": "Dec 2015",
-    "label": "Chan Zuckerberg Initiative founded",
+    "label": "Chan Zuckerberg Initiative est.",
     "description": "Funded by Mark Zuckerberg and Priscilla Chan to support science and education."
   },
   {
-    "date": "Jan 2017",
-    "label": "Cellarity founded",
-    "description": "Flagship Pioneering launches cell-behavior-driven drug discovery company."
+    "date": "Dec 2016",
+    "label": "Perturb-seq",
+    "description": "CRISPR-based perturbation followed by scRNA-seq. Mainly in immune cells ([Dixit et al.](https://www.sciencedirect.com/science/article/pii/S0092867416316105?via%3Dihub))"
   },
   {
-    "date": "Apr 2017",
-    "label": "10x Genomics founded",
-    "description": "Company commercializes single-cell and spatial omics platforms."
+    "date": "Jun 2017",
+    "label": "Transformers",
+    "description": "All you need is attention [Vaswani et al.](https://arxiv.org/abs/1706.03762) - model for language translation."
+  },
+  {
+    "date": "Oct 2017",
+    "label": "Cellarity Inc.",
+    "description": "Drug effects for therapeutics in blood and immune cells using ML and single cell multi-omics. Hosts [OpenProblems](https://openproblems.bio/datasets) (ML competitions and datasets)."
+  },
+  {
+    "date": "Sep 2017",
+    "label": "scVI",
+    "description": "Transcriptomics analysis with variational autoencoders."
+  },
+  {
+    "date": "Dec 2019",
+    "label": "Coupled autoencoders",
+    "description": "Multimodal alignment of single-cell resolution profiles (transcriptomics and electrophysiology) for consistent, cross-modal cell type definition."
   },
   {
     "date": "Sep 2021",
-    "label": "Arc Institute founded",
-    "description": "Philanthropically backed biomedical research institute."
+    "label": "Arc Institute est.",
+    "description": "Research institute with broad focus. Early computational works include Evo models, STATE model."
   },
   {
-    "date": "Dec 2021",
-    "label": "NewLimit founded",
-    "description": "Longevity biotech focused on epigenetic reprogramming."
+    "date": "Nov 2021",
+    "label": "OpenProblems benchmarks",
+    "description": "Benchmarking efforts for single-cell multimodal datasets, in PBMC [OpenProblems](https://openproblems.bio/datasets) (ML competitions and datasets)."
+  },
+  {
+    "date": "Oct 2021",
+    "label": "NewLimit Inc.",
+    "description": "Platform to discover partial (preserve type, reverse age) and durable ways to reprogram liver cells + T cells."
   },
   {
     "date": "Jan 2022",
-    "label": "Altos Labs founded",
-    "description": "Privately funded company researching cellular rejuvenation."
+    "label": "Altos Labs Inc.",
+    "description": "Broadly working in cellular reprogramming; engages in data generation and modeling."
   },
   {
     "date": "Jul 2022",
-    "label": "Ultima Genomics founded",
-    "description": "DNA sequencing company developing ultra-low-cost sequencing technology."
+    "label": "Ultima Genomics Inc.",
+    "description": "Company makes sequencers, consumables, software. Major data producer for CZI's 1 billion cells project."
+  },
+  {
+    "date": "Nov 2022",
+    "label": "ChatGPT",
+    "description": "OpenAI makes a ChatGPT publicly available."
   },
   {
     "date": "Jun 2023",
-    "label": "Somite AI founded",
-    "description": "Venture-backed AI-driven drug discovery startup."
+    "label": "Somite AI Inc.",
+    "description": "Platform to refine protocols to control cell fate and differentiation. Data generation + perturbation modeling."
   },
   {
-    "date": "Apr 2024",
-    "label": "Tahoe 100M program announced",
-    "description": "Large-scale initiative focused on molecular rejuvenation and reprogramming research."
+    "date": "May 2023",
+    "label": "Geneformer",
+    "description": "Transformers applied to single cell data."
   },
   {
-    "date": "Sep 2024",
-    "label": "Tahoe Therapeutics founded",
-    "description": "Biotech startup translating reprogramming and rejuvenation science into therapeutics."
+    "date": "Feb 2025",
+    "label": "Tahoe100M open sourced",
+    "description": "100M cells, 50 cancer cell lines, 1000 drug perturbations (Tahoe therapeutics + Arc Institute)."
+  },
+  {
+    "date": "May 2025",
+    "label": "First personalized CRISPR therapy",
+    "description": "Base editing to rescue CPS-1 deficiency, _in vivo_ liver cells. [Musunuru et al.](https://www.nejm.org/doi/full/10.1056/NEJMoa2504747)"
+  },
+  {
+    "date": "May 2025",
+    "label": "Project bloom funded",
+    "description": "Goal is to learn a unified representation space for multi-modal, multi-species data across conditions."
   }
 ]
